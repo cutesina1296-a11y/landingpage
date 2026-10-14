@@ -158,6 +158,15 @@ function createApp({ db, bucket, allowedOrigin, adminUsername, adminPassword, se
     }
   }
 
+  app.get('/', (req, res) => {
+    res.json({
+      service: 'Money Hub API',
+      ok: true,
+      health: '/api/health',
+      admin: '/api/admin/login'
+    });
+  });
+
   app.get('/api/health', async (req, res, next) => {
     try {
       await db.command({ ping: 1 });

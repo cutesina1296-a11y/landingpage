@@ -56,6 +56,15 @@ test('serves public settings and protects admin settings with login', async t =>
   const address = server.address();
   const baseUrl = `http://127.0.0.1:${address.port}`;
 
+  const rootResponse = await fetch(`${baseUrl}/`);
+  assert.equal(rootResponse.status, 200);
+  assert.deepEqual(await rootResponse.json(), {
+    service: 'Money Hub API',
+    ok: true,
+    health: '/api/health',
+    admin: '/api/admin/login'
+  });
+
   const healthResponse = await fetch(`${baseUrl}/api/health`);
   assert.equal(healthResponse.status, 200);
   assert.deepEqual(await healthResponse.json(), { ok: true, database: 'connected' });
