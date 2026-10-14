@@ -40,7 +40,10 @@ test('compares credentials without accepting different lengths', () => {
 test('serves public settings and protects admin settings with login', async t => {
   const settingsCollection = { findOne: async () => null };
   const app = createApp({
-    db: { collection: () => settingsCollection },
+    db: {
+      collection: () => settingsCollection,
+      command: async () => ({ ok: 1 })
+    },
     bucket: {},
     allowedOrigin: 'https://site.example',
     adminUsername: 'owner',
@@ -52,6 +55,10 @@ test('serves public settings and protects admin settings with login', async t =>
   await new Promise(resolve => server.once('listening', resolve));
   const address = server.address();
   const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  const healthResponse = await fetch(`${baseUrl}/api/health`);
+  assert.equal(healthResponse.status, 200);
+  assert.deepEqual(await healthResponse.json(), { ok: true, database: 'connected' });
 
   const publicResponse = await fetch(`${baseUrl}/api/config`);
   assert.equal(publicResponse.status, 200);

@@ -158,7 +158,14 @@ function createApp({ db, bucket, allowedOrigin, adminUsername, adminPassword, se
     }
   }
 
-  app.get('/api/health', (req, res) => res.json({ ok: true }));
+  app.get('/api/health', async (req, res, next) => {
+    try {
+      await db.command({ ping: 1 });
+      res.json({ ok: true, database: 'connected' });
+    } catch (error) {
+      next(error);
+    }
+  });
 
   app.get('/api/config', async (req, res, next) => {
     try {
