@@ -308,7 +308,9 @@ async function start() {
   const adminUsername = requiredEnv('ADMIN_USERNAME');
   const adminPassword = requiredEnv('ADMIN_PASSWORD');
   const sessionSecret = requiredEnv('SESSION_SECRET');
-  const configuredOrigin = requiredEnv('ALLOWED_ORIGIN').replace(/\/$/, '');
+  const configuredOrigin = (process.env.ALLOWED_ORIGIN ||
+    (process.env.NODE_ENV !== 'production' ? 'http://127.0.0.1:5500' : '')).replace(/\/$/, '');
+  if (!configuredOrigin) throw new Error('Missing required environment variable: ALLOWED_ORIGIN');
   if (sessionSecret.length < 32) throw new Error('SESSION_SECRET must contain at least 32 characters.');
   let parsedOrigin;
   try {
