@@ -2,6 +2,8 @@
 
 The public site stays on GitHub Pages. The private admin API runs on Render and saves settings and images in MongoDB Atlas.
 
+The repository root contains a Yarn/npm workspace manifest so Render can install and start the backend even when its service root directory is left at the repository root. For a Render service configured with the backend as its root directory, use `npm install` as the build command and `npm start` as the start command.
+
 ## Run locally
 
 1. The backend reads environment variables from the project-root `.env` file. The local site preview below deliberately blocks dotfiles from HTTP access.
