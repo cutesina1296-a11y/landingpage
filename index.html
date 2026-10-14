@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Money Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Meta Pixel Code (leave this exactly as is) -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '1416634717066394');
+      fbq('track', 'PageView');
+    </script>
+    <noscript>
+      <img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=1416634717066394&ev=PageView&noscript=1"
+      />
+    </noscript>
+    <!-- End Meta Pixel Code -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+      * { margin:0; padding:0; box-sizing: border-box; font-family: 'Poppins', Arial, sans-serif; }
+      body { background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%); color:#333; line-height:1.6; }
+      .app-container { max-width:600px; margin:20px auto; background:white; box-shadow:0 10px 30px rgba(0,0,0,0.1); border-radius:20px; overflow:hidden; position:relative; }
+      .app-header { background: linear-gradient(135deg, #00dc09 0%, #4CAF50 100%); color:white; padding:25px 20px; text-align:center; position:relative; border-bottom-left-radius:30px; border-bottom-right-radius:30px; }
+      .app-icon { width:90px; height:90px; border-radius:20px; border:4px solid rgba(255,255,255,0.3); box-shadow:0 10px 20px rgba(0,0,0,0.2); margin:10px auto; object-fit:contain; background:white; padding:5px; }
+      .app-title { font-size:24px; font-weight:700; margin:10px 0 5px; letter-spacing:-0.5px; }
+      .app-developer { font-size:14px; opacity:0.95; max-width:80%; margin:0 auto; line-height:1.5; }
+      .app-content { padding:25px; }
+      .screenshot-container { display:flex; overflow-x:scroll; gap:15px; padding:10px 0; margin:3px 0; -webkit-overflow-scrolling:touch; scrollbar-width:thin; }
+      .screenshot { height:220px; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.1); border:1px solid #eee; transition:transform 0.3s; }
+      .screenshot:hover { transform: scale(1.02); }
+      .download-btn { display:block; background:linear-gradient(135deg, #ef2020 0%, #c62828 100%); color:white; text-align:center; padding:18px; border-radius:12px; font-weight:600; text-decoration:none; margin:30px 0; box-shadow:0 10px 20px rgba(198,40,40,0.3); transition:all 0.3s ease; font-size:16px; border:none; width:100%; position:relative; overflow:hidden; cursor:pointer; }
+      .download-btn::after { content:''; position:absolute; top:-50%; left:-60%; width:200%; height:200%; background:rgba(255,255,255,0.1); transform:rotate(30deg); transition:all 0.3s; }
+      .download-btn:hover::after { left:100%; }
+      .download-btn:hover { transform:translateY(-3px); box-shadow:0 15px 30px rgba(198,40,40,0.4); }
+      .checkin-box { background:#ffffff; border:2px solid #2196f3; border-radius:15px; padding:20px; width:100%; box-shadow:0 5px 15px rgba(0,0,0,0.05); margin:25px 0; }
+      .checkin-box h3 { margin:0 0 15px 0; color:#1D4ED8; display:flex; align-items:center; font-size:18px; font-weight:600; }
+      .checkin-icon { font-size:24px; margin-right:10px; color:#10B981; }
+      @media (max-width:480px) { .app-container { margin:1px; border-radius:1px; } .app-header { padding:20px 1px; border-bottom-left-radius:1px; border-bottom-right-radius:1px; } .app-icon { width:80px; height:80px; } .app-title { font-size:22px; } .screenshot { height:180px; } .download-btn { padding:16px; font-size:15px; } .checkin-box { padding:15px; } }
+    </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="app-header">
+      <img src="uploads/logo.png" alt="App Icon" class="app-icon">
+      <h1 class="app-title">Money Hub</h1>
+      <p class="app-developer">📢💸अगर आपको भी हर दिन ₹2000-₹3000 कमाना है तो ज्वाइन करे जल्दी 💸🎉जल्दी 💸🎉<br><br>📲 App का Link Telegram Group में मिलेगा!<br>Best Application — Register करके Earning करो!💰</p>
+    </div>
+
+    <div class="app-content">
+      <div class="screenshot-container">
+        <img id="screen1" src="uploads/screen-1.png" class="screenshot" loading="lazy" alt="App screenshot 1">
+        <img id="screen2" src="uploads/screen-2.png" class="screenshot" loading="lazy" alt="App screenshot 2">
+        <img id="screen3" src="uploads/screen-3.png" class="screenshot" loading="lazy" alt="App screenshot 3">
+      </div>
+
+      <!-- Use a button element rather than anchor for consistent JS control -->
+      <button id="groupBtn" class="download-btn" aria-label="Join Telegram group">
+        <i class="fab fa-telegram"></i> Join Group
+      </button>
+
+      <div class="checkin-box">
+        <h3><span class="checkin-icon">✓</span> App Benefits</h3>
+        <ul>
+          <li><span class="checkin-icon">✓ </span> Trusted &amp; Genuine</li>
+          <li><span class="checkin-icon">✓ </span> Daily income &amp; Daily Withdrawal</li>
+          <li><span class="checkin-icon">✓ </span> Instant Fast Withdraw Success</li>
+          <li><span class="checkin-icon">✓ </span> 24/7 Support Available</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+
+  <!-- Debug helper (optional) -->
+  <script>
+    // Small utility: shows pixel status in console
+    (function(){
+      function safeLog(){ if(window.console && console.log) console.log.apply(console, arguments); }
+      safeLog('[PIXEL] Pixel base code loaded. fbq defined?', !!window.fbq);
+    })();
+  </script>
+
+  <!-- Updated click handler: ensures pixel event is delivered before navigation -->
+  <script>
+    (function(){
+      const btn = document.getElementById('groupBtn');
+      let groupLink = "https://t.me/officialapplication76";
+      const pixelId = '1416634717066394';
+      const apiBase = (window.MONEY_HUB_API || '').replace(/\/$/, '');
+      const settingsReady = apiBase
+        ? fetch(`${apiBase}/api/config`)
+            .then(response => {
+              if (!response.ok) throw new Error(`Settings request failed (${response.status})`);
+              return response.json();
+            })
+            .then(settings => {
+              if (typeof settings.groupLink === 'string') groupLink = settings.groupLink;
+              if (settings.logoId) document.querySelector('.app-icon').src = `${apiBase}/api/assets/${encodeURIComponent(settings.logoId)}`;
+              settings.screenshots.forEach((assetId, index) => {
+                if (assetId) document.getElementById(`screen${index + 1}`).src = `${apiBase}/api/assets/${encodeURIComponent(assetId)}`;
+              });
+            })
+            .catch(error => console.warn('[SETTINGS] Could not load saved site settings:', error))
+        : Promise.resolve();
+
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        const eventID = 'evt_' + Date.now();
+
+        // 1) Fire fbq event (wrapped in try/catch)
+        try {
+          if (typeof fbq === 'function') {
+            fbq('track', 'Subscribe', { value: 0.00, currency: 'INR' }, { eventID: eventID });
+            console.log('[PIXEL] fbq.track called for Subscribe, eventID:', eventID);
+          } else {
+            console.warn('[PIXEL] fbq not defined when trying to track Subscribe');
+          }
+        } catch (err) {
+          console.warn('[PIXEL] Error calling fbq:', err);
+        }
+
+        // 2) Try navigator.sendBeacon fallback to facebook/tr (best-effort)
+        try {
+          if (navigator.sendBeacon) {
+            const url = "https://www.facebook.com/tr";
+            // Minimal payload (FB may not accept arbitrary payloads, but it's a best-effort)
+            const payload = new URLSearchParams({
+              id: pixelId,
+              ev: 'Subscribe',
+              cd: JSON.stringify({ value: 0.00, currency: 'INR' }),
+              evtid: eventID,
+              noscript: '0'
+            }).toString();
+            const blob = new Blob([payload], { type: 'application/x-www-form-urlencoded' });
+            const ok = navigator.sendBeacon(url, blob);
+            console.log('[PIXEL] sendBeacon attempted, result:', ok);
+          }
+        } catch (be) {
+          console.warn('[PIXEL] sendBeacon error:', be);
+        }
+
+        // 3) Slight delay to allow pixel request to be sent before navigation away.
+        //    500ms is a good compromise between reliability and UX.
+        settingsReady.finally(() => {
+          setTimeout(() => { window.location.href = groupLink; }, 500);
+        });
+      });
+    })();
+  </script>
+
+  <!-- Cloudflare beacon (kept as in your original file) -->
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015"
+    integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ=="
+    data-cf-beacon='{"version":"2024.11.0","token":"f45eeab722ed4483a9b27e76e57a4be5","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}'
+    crossorigin="anonymous"></script>
+</body>
+</html>  

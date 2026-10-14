@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Money Hub Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; font-family: Poppins, Arial, sans-serif; }
+    body { margin: 0; padding: 24px; color: #222; background: #f3f4f6; }
+    main { max-width: 620px; margin: 30px auto; padding: 28px; background: #fff; border-radius: 16px; box-shadow: 0 8px 28px #00000012; }
+    h1 { margin-top: 0; font-size: 24px; }
+    label { display: block; margin: 18px 0 7px; font-weight: 600; }
+    input { width: 100%; padding: 12px; border: 1px solid #ccd0d5; border-radius: 8px; font-size: 15px; }
+    input[type=file] { padding: 9px; }
+    button { padding: 12px 18px; border: 0; border-radius: 8px; color: #fff; background: #c62828; font-weight: 600; cursor: pointer; }
+    button:disabled { opacity: .6; cursor: wait; }
+    .actions { display: flex; gap: 10px; margin-top: 22px; }
+    .secondary { color: #333; background: #e5e7eb; }
+    .preview { display: block; max-width: 160px; max-height: 120px; margin-top: 8px; object-fit: contain; }
+    .hint, #status { color: #606770; font-size: 13px; }
+    #status { min-height: 24px; margin-top: 16px; }
+    #status.error { color: #b42318; }
+    #status.success { color: #16803c; }
+    [hidden] { display: none !important; }
+    @media (max-width: 520px) { body { padding: 10px; } main { margin: 10px auto; padding: 20px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Money Hub Admin</h1>
+    <p class="hint">Login karke logo, screenshots aur Telegram group link update karein.</p>
+
+    <form id="loginForm">
+      <label for="username">Admin username</label>
+      <input id="username" name="username" autocomplete="username" required>
+      <label for="password">Admin password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <div class="actions"><button type="submit">Login</button></div>
+    </form>
+
+    <form id="settingsForm" hidden>
+      <label for="groupLink">Telegram group link (HTTPS)</label>
+      <input id="groupLink" name="groupLink" type="url" placeholder="https://t.me/yourgroup" required>
+
+      <label for="logo">App logo</label>
+      <input id="logo" name="logo" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+      <img id="logoPreview" class="preview" alt="Current logo preview" hidden>
+
+      <label for="screen1">Screenshot 1</label>
+      <input id="screen1" name="screen1" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+      <img id="screen1Preview" class="preview" alt="Current screenshot 1 preview" hidden>
+
+      <label for="screen2">Screenshot 2</label>
+      <input id="screen2" name="screen2" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+      <img id="screen2Preview" class="preview" alt="Current screenshot 2 preview" hidden>
+
+      <label for="screen3">Screenshot 3</label>
+      <input id="screen3" name="screen3" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+      <img id="screen3Preview" class="preview" alt="Current screenshot 3 preview" hidden>
+      <p class="hint">Images: PNG, JPG, WebP ya GIF; har image maximum 5 MB. Khali chhode gaye images badlenge nahi.</p>
+
+      <div class="actions">
+        <button id="saveButton" type="submit">Save changes</button>
+        <button id="logoutButton" class="secondary" type="button">Logout</button>
+      </div>
+    </form>
+    <p id="status" role="status" aria-live="polite"></p>
+  </main>
+
+  <script src="config.js"></script>
+  <script>
+    (() => {
+      const apiBase = (window.MONEY_HUB_API || '').replace(/\/$/, '');
+      const loginForm = document.getElementById('loginForm');
+      const settingsForm = document.getElementById('settingsForm');
+      const status = document.getElementById('status');
+      const saveButton = document.getElementById('saveButton');
+      let token = '';
+
+      function setStatus(message, type) {
+        status.textContent = message;
+        status.className = type || '';
+      }
+
+      async function request(path, options) {
+        if (!apiBase) throw new Error('Pehle config.js me Render API URL set karke site deploy karein.');
+        const response = await fetch(`${apiBase}${path}`, options);
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || `Request failed (${response.status}).`);
+        return result;
+      }
+
+      function showPreview(id, assetId) {
+        const image = document.getElementById(`${id}Preview`);
+        if (assetId) {
+          image.src = `${apiBase}/api/assets/${encodeURIComponent(assetId)}`;
+          image.hidden = false;
+        } else {
+          image.removeAttribute('src');
+          image.hidden = true;
+        }
+      }
+
+      async function loadSettings() {
+        const settings = await request('/api/admin/config', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        document.getElementById('groupLink').value = settings.groupLink;
+        showPreview('logo', settings.logoId);
+        settings.screenshots.forEach((assetId, index) => showPreview(`screen${index + 1}`, assetId));
+      }
+
+      loginForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        setStatus('Logging in…');
+        try {
+          const result = await request('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: document.getElementById('username').value,
+              password: document.getElementById('password').value
+            })
+          });
+          token = result.token;
+          document.getElementById('password').value = '';
+          await loadSettings();
+          loginForm.hidden = true;
+          settingsForm.hidden = false;
+          setStatus('Logged in. Yahan changes save karein.', 'success');
+        } catch (error) {
+          setStatus(error.message, 'error');
+        }
+      });
+
+      settingsForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        saveButton.disabled = true;
+        setStatus('Saving changes…');
+        try {
+          const result = await request('/api/admin/config', {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${token}` },
+            body: new FormData(settingsForm)
+          });
+          settingsForm.reset();
+          document.getElementById('groupLink').value = result.groupLink;
+          showPreview('logo', result.logoId);
+          result.screenshots.forEach((assetId, index) => showPreview(`screen${index + 1}`, assetId));
+          setStatus('Changes saved. Public website par update dikhne me kuch seconds lag sakte hain.', 'success');
+        } catch (error) {
+          if (error.message === 'Please log in again.') {
+            token = '';
+            settingsForm.hidden = true;
+            loginForm.hidden = false;
+          }
+          setStatus(error.message, 'error');
+        } finally {
+          saveButton.disabled = false;
+        }
+      });
+
+      document.getElementById('logoutButton').addEventListener('click', () => {
+        token = '';
+        settingsForm.reset();
+        settingsForm.hidden = true;
+        loginForm.hidden = false;
+        setStatus('Logged out.');
+      });
+
+      for (const id of ['logo', 'screen1', 'screen2', 'screen3']) {
+        document.getElementById(id).addEventListener('change', event => {
+          const file = event.target.files[0];
+          if (!file) return;
+          if (file.size > 5 * 1024 * 1024) {
+            event.target.value = '';
+            setStatus('Har image maximum 5 MB honi chahiye.', 'error');
+            return;
+          }
+          const preview = document.getElementById(`${id}Preview`);
+          preview.src = URL.createObjectURL(file);
+          preview.hidden = false;
+        });
+      }
+
+      if (!apiBase) setStatus('Backend abhi configure nahi hai. config.js me Render API URL set karein.', 'error');
+    })();
+  </script>
+</body>
+</html>
