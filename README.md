@@ -16,7 +16,7 @@ Keep `.env` out of any public GitHub repository. The local preview server blocks
 
 1. Create a MongoDB Atlas database and database user. Allow the Render service to connect and copy the database connection string.
 2. Push the project to GitHub and create a Render Blueprint from the repository using `render.yaml`.
-3. In Render, set `MONGODB_URI`, `ADMIN_USERNAME`, and `ADMIN_PASSWORD` for the `money-hub` service. Render generates `SESSION_SECRET`; the API uses Render's external URL as its same-origin setting.
+3. In Render, set `MONGODB_URI`, `ADMIN_USERNAME`, and `ADMIN_PASSWORD` for the `money-hub` service. Render generates `SESSION_SECRET`; the API automatically allows the Render service URL. If the admin page is hosted on another domain, set `ALLOWED_ORIGIN` to that exact HTTPS origin. Multiple allowed origins can be comma-separated.
 4. Deploy the service. The landing page, admin page, and API will all be available on the service's HTTPS URL.
 5. Open `https://<your-render-service>.onrender.com/admin.html`, sign in with the Render admin credentials, and save the Telegram link, logo, and screenshots.
 

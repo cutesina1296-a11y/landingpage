@@ -45,7 +45,7 @@ test('serves public settings and protects admin settings with login', async t =>
       command: async () => ({ ok: 1 })
     },
     bucket: {},
-    allowedOrigin: 'https://site.example',
+    allowedOrigins: ['https://site.example', 'https://money-hub.onrender.com'],
     adminUsername: 'owner',
     adminPassword: 'test-password',
     sessionSecret: 'a session secret long enough for testing'
@@ -79,6 +79,17 @@ test('serves public settings and protects admin settings with login', async t =>
   const publicResponse = await fetch(`${baseUrl}/api/config`);
   assert.equal(publicResponse.status, 200);
   assert.equal((await publicResponse.json()).groupLink, 'https://t.me/officialapplication76');
+
+  const renderOriginResponse = await fetch(`${baseUrl}/api/config`, {
+    headers: { Origin: 'https://money-hub.onrender.com' }
+  });
+  assert.equal(renderOriginResponse.status, 200);
+  assert.equal(renderOriginResponse.headers.get('access-control-allow-origin'), 'https://money-hub.onrender.com');
+
+  const blockedOriginResponse = await fetch(`${baseUrl}/api/config`, {
+    headers: { Origin: 'https://untrusted.example' }
+  });
+  assert.equal(blockedOriginResponse.status, 403);
 
   const unauthorizedResponse = await fetch(`${baseUrl}/api/admin/config`);
   assert.equal(unauthorizedResponse.status, 401);

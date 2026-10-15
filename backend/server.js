@@ -89,10 +89,11 @@ function parseGroupLink(value) {
   return url.toString();
 }
 
-function createApp({ db, bucket, allowedOrigin, adminUsername, adminPassword, sessionSecret }) {
+function createApp({ db, bucket, allowedOrigins, adminUsername, adminPassword, sessionSecret }) {
   const app = express();
   const projectRoot = path.resolve(__dirname, '..');
   const settingsCollection = db.collection('site_settings');
+  const allowedOriginSet = new Set(allowedOrigins);
   const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: MAX_IMAGE_SIZE, files: 4, fields: 5, parts: 10 },
@@ -112,7 +113,7 @@ function createApp({ db, bucket, allowedOrigin, adminUsername, adminPassword, se
   app.use(helmet({ contentSecurityPolicy: false }));
   app.use(cors({
     origin: (origin, callback) => {
-      if (!origin || origin === allowedOrigin) return callback(null, true);
+      if (!origin || allowedOriginSet.has(origin)) return callback(null, true);
       callback(new Error('Origin is not allowed.'));
     },
     methods: ['GET', 'POST', 'PUT', 'OPTIONS'],
@@ -319,31 +320,42 @@ async function start() {
   const adminUsername = requiredEnv('ADMIN_USERNAME');
   const adminPassword = requiredEnv('ADMIN_PASSWORD');
   const sessionSecret = requiredEnv('SESSION_SECRET');
-  const configuredOrigin = (process.env.ALLOWED_ORIGIN || process.env.RENDER_EXTERNAL_URL ||
-    (process.env.NODE_ENV !== 'production' ? 'http://127.0.0.1:5500' : '')).replace(/\/$/, '');
-  if (!configuredOrigin) throw new Error('Missing required environment variable: ALLOWED_ORIGIN');
+  const configuredOrigins = (process.env.ALLOWED_ORIGIN || '')
+    .split(',')
+    .map(origin => origin.trim().replace(/\/$/, ''))
+    .filter(Boolean);
+  if (process.env.RENDER_EXTERNAL_URL) {
+    configuredOrigins.push(process.env.RENDER_EXTERNAL_URL.replace(/\/$/, ''));
+  }
+  if (!configuredOrigins.length && process.env.NODE_ENV !== 'production') {
+    configuredOrigins.push('http://127.0.0.1:5500');
+  }
+  if (!configuredOrigins.length) throw new Error('Missing required environment variable: ALLOWED_ORIGIN');
   if (sessionSecret.length < 32) throw new Error('SESSION_SECRET must contain at least 32 characters.');
-  let parsedOrigin;
-  try {
-    parsedOrigin = new URL(configuredOrigin);
-  } catch {
-    throw new Error('ALLOWED_ORIGIN must be a valid HTTPS origin.');
+  const allowedOrigins = new Set();
+  for (const configuredOrigin of configuredOrigins) {
+    let parsedOrigin;
+    try {
+      parsedOrigin = new URL(configuredOrigin);
+    } catch {
+      throw new Error('ALLOWED_ORIGIN must contain valid HTTPS origins.');
+    }
+    const isLocalDevelopmentOrigin = process.env.NODE_ENV !== 'production' &&
+      parsedOrigin.protocol === 'http:' &&
+      ['localhost', '127.0.0.1'].includes(parsedOrigin.hostname);
+    if ((!isLocalDevelopmentOrigin && parsedOrigin.protocol !== 'https:') ||
+        parsedOrigin.origin !== configuredOrigin ||
+        parsedOrigin.pathname !== '/' || parsedOrigin.search || parsedOrigin.hash) {
+      throw new Error('ALLOWED_ORIGIN must contain HTTPS origins without paths (HTTP is allowed for localhost development only).');
+    }
+    allowedOrigins.add(parsedOrigin.origin);
   }
-  const isLocalDevelopmentOrigin = process.env.NODE_ENV !== 'production' &&
-    parsedOrigin.protocol === 'http:' &&
-    ['localhost', '127.0.0.1'].includes(parsedOrigin.hostname);
-  if ((!isLocalDevelopmentOrigin && parsedOrigin.protocol !== 'https:') ||
-      parsedOrigin.origin !== configuredOrigin ||
-      parsedOrigin.pathname !== '/' || parsedOrigin.search || parsedOrigin.hash) {
-    throw new Error('ALLOWED_ORIGIN must be an HTTPS origin without a path (HTTP is allowed for localhost development only).');
-  }
-  const allowedOrigin = parsedOrigin.origin;
 
   const client = new MongoClient(mongoUri);
   await client.connect();
   const db = client.db();
   const bucket = new GridFSBucket(db, { bucketName: 'site_assets' });
-  const app = createApp({ db, bucket, allowedOrigin, adminUsername, adminPassword, sessionSecret });
+  const app = createApp({ db, bucket, allowedOrigins, adminUsername, adminPassword, sessionSecret });
   const port = Number(process.env.PORT) || 3000;
   const server = app.listen(port, () => console.log(`[API] Listening on port ${port}`));
 
