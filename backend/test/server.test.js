@@ -58,12 +58,19 @@ test('serves public settings and protects admin settings with login', async t =>
 
   const rootResponse = await fetch(`${baseUrl}/`);
   assert.equal(rootResponse.status, 200);
-  assert.deepEqual(await rootResponse.json(), {
-    service: 'Money Hub API',
-    ok: true,
-    health: '/api/health',
-    admin: '/api/admin/login'
-  });
+  assert.match(rootResponse.headers.get('content-type'), /text\/html/);
+  assert.match(await rootResponse.text(), /class="app-title">Money Hub/);
+
+  const adminPageResponse = await fetch(`${baseUrl}/admin.html`);
+  assert.equal(adminPageResponse.status, 200);
+  assert.match(adminPageResponse.headers.get('content-type'), /text\/html/);
+
+  const logoResponse = await fetch(`${baseUrl}/uploads/logo.png`);
+  assert.equal(logoResponse.status, 200);
+  assert.match(logoResponse.headers.get('content-type'), /image\/png/);
+
+  const privateFileResponse = await fetch(`${baseUrl}/package.json`);
+  assert.equal(privateFileResponse.status, 404);
 
   const healthResponse = await fetch(`${baseUrl}/api/health`);
   assert.equal(healthResponse.status, 200);

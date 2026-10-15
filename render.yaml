@@ -1,8 +1,8 @@
 services:
   - type: web
-    name: money-hub-admin-api
+    name: money-hub
     runtime: node
-    rootDir: backend
+    rootDir: .
     buildCommand: npm install
     startCommand: npm start
     envVars:
@@ -11,8 +11,6 @@ services:
       - key: ADMIN_USERNAME
         sync: false
       - key: ADMIN_PASSWORD
-        sync: false
-      - key: ALLOWED_ORIGIN
         sync: false
       - key: SESSION_SECRET
         generateValue: true

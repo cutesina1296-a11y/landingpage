@@ -91,6 +91,7 @@ function parseGroupLink(value) {
 
 function createApp({ db, bucket, allowedOrigin, adminUsername, adminPassword, sessionSecret }) {
   const app = express();
+  const projectRoot = path.resolve(__dirname, '..');
   const settingsCollection = db.collection('site_settings');
   const upload = multer({
     storage: multer.memoryStorage(),
@@ -108,7 +109,7 @@ function createApp({ db, bucket, allowedOrigin, adminUsername, adminPassword, se
 
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
-  app.use(helmet());
+  app.use(helmet({ contentSecurityPolicy: false }));
   app.use(cors({
     origin: (origin, callback) => {
       if (!origin || origin === allowedOrigin) return callback(null, true);
@@ -157,15 +158,6 @@ function createApp({ db, bucket, allowedOrigin, adminUsername, adminPassword, se
       }
     }
   }
-
-  app.get('/', (req, res) => {
-    res.json({
-      service: 'Money Hub API',
-      ok: true,
-      health: '/api/health',
-      admin: '/api/admin/login'
-    });
-  });
 
   app.get('/api/health', async (req, res, next) => {
     try {
@@ -302,9 +294,19 @@ function createApp({ db, bucket, allowedOrigin, adminUsername, adminPassword, se
     });
   });
 
+  app.get('/', (req, res, next) => res.sendFile(path.join(projectRoot, 'index.html'), next));
+  app.get('/admin.html', (req, res, next) => res.sendFile(path.join(projectRoot, 'admin.html'), next));
+  app.get('/config.js', (req, res, next) => res.sendFile(path.join(projectRoot, 'config.js'), next));
+  app.use('/uploads', express.static(path.join(projectRoot, 'uploads'), {
+    dotfiles: 'deny',
+    fallthrough: false,
+    maxAge: '1d'
+  }));
+
   app.use((error, req, res, next) => {
     console.error('[API] Request failed:', error);
     if (res.headersSent) return next(error);
+    if (error.status === 404) return res.sendStatus(404);
     if (error.message === 'Origin is not allowed.') return res.status(403).json({ error: error.message });
     res.status(500).json({ error: 'Server error. Please try again later.' });
   });
@@ -317,7 +319,7 @@ async function start() {
   const adminUsername = requiredEnv('ADMIN_USERNAME');
   const adminPassword = requiredEnv('ADMIN_PASSWORD');
   const sessionSecret = requiredEnv('SESSION_SECRET');
-  const configuredOrigin = (process.env.ALLOWED_ORIGIN ||
+  const configuredOrigin = (process.env.ALLOWED_ORIGIN || process.env.RENDER_EXTERNAL_URL ||
     (process.env.NODE_ENV !== 'production' ? 'http://127.0.0.1:5500' : '')).replace(/\/$/, '');
   if (!configuredOrigin) throw new Error('Missing required environment variable: ALLOWED_ORIGIN');
   if (sessionSecret.length < 32) throw new Error('SESSION_SECRET must contain at least 32 characters.');
